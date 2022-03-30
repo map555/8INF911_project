@@ -20,6 +20,8 @@ if __name__ == '__main__':
 
     meme_generator = MemeGenerator()
 
-    meme_generator.train_model(memes_text)
+   #meme_generator.train_model(memes_text)
+
+    #meme_generator.generate_text()
 
     meme_generator.generate_meme()

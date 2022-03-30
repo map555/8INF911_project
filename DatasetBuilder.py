@@ -5,7 +5,6 @@ import pandas as pd
 from os.path import exists
 
 
-
 def approximateTemplateBoxNumbers(file):
     memes = json.load(file)
     memes_nb = len(memes)
@@ -58,7 +57,7 @@ def getDataset(file_path):
                 df = pd.concat(
                     [df, getMemesTemplateDF(open(os.path.join(new_work_dir, file)), templates_box_count[x], file_name)],
                     ignore_index=True)
-            x+=1
+            x += 1
 
     os.chdir(work_dir)
     df.to_csv("memes.csv")
@@ -93,15 +92,14 @@ def getMemesTemplateDF(file, box_count, template_names):
     df = pd.DataFrame(data,
                       columns=["title", "template", "author", "content", "number_of_boxes", "url", "votes", "views"])
 
-
     return df
 
 
 def convertViews(views_str):
     try:
-        views_str = views_str.replace(",",".")
-        number_of_decimal =len(views_str.split(".")[1].rstrip("0"))
-        converted_views = int(math.pow(10, number_of_decimal)*float(views_str))
+        views_str = views_str.replace(",", ".")
+        number_of_decimal = len(views_str.split(".")[1].rstrip("0"))
+        converted_views = int(math.pow(10, number_of_decimal) * float(views_str))
     except:
         converted_views = int(views_str)
 
@@ -124,11 +122,12 @@ def formatContent(meme_boxes):
 def getFileName(file_name_with_extension):
     return file_name_with_extension[0:len(file_name_with_extension) - 5]
 
+
 def isDatasetExist():
-    dataset_file_existance=exists("memes.csv")
+    dataset_file_existance = exists("memes.csv")
 
     return dataset_file_existance
 
+
 def importDataset():
     return pd.read_csv("memes.csv")
-

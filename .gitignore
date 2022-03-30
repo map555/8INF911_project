@@ -6,3 +6,5 @@
 .idea/workspace.xml
 __pycache__/DatasetBuilder.cpython-310.pyc
 memes.csv
+.idea/misc.xml
+meme_text.txt

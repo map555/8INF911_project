@@ -8,3 +8,4 @@ __pycache__/DatasetBuilder.cpython-310.pyc
 memes.csv
 .idea/misc.xml
 meme_text.txt
+*.pyc

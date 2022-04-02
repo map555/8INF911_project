@@ -13,14 +13,11 @@ class SequenceGenerator:
     def generate_sequences(self, memes_text):
         # generate sequences
         # length of text is the number of characters in it
-        print(f'Length of text: {len(memes_text)} characters')
 
         # Take a look at the first 250 characters in text
-        print(memes_text[:250])
 
         # The unique characters in the file
         vocab = sorted(set(memes_text))
-        print(f'{len(vocab)} unique characters')
 
         self.ids_from_chars = tf.keras.layers.StringLookup(
             vocabulary=list(vocab), mask_token=None)

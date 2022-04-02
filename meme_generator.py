@@ -1,22 +1,28 @@
+import random
+
 from sequence_generator import *
 from RNN import *
 from one_step import OneStep
 import os
 import requests
 import urllib
+from datetime import datetime
 
 
 class MemeGenerator:
     sequence_generator = []
     model = []
 
-    def __init__(self):
+    def __init__(self,epoch_number, memes_text):
         self.sequence_generator = SequenceGenerator()
         self.__username = os.environ.get('meme_username')
         self.__password = os.environ.get('meme_password')
-        self.__user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Safari/537.36'
+        self.__user_agent = os.environ.get("meme_user_agent")
+        self._epoch = epoch_number
 
-    def train_model(self, memes_text):
+        self._train_model(memes_text)
+
+    def _train_model(self, memes_text):
         dataset = self.sequence_generator.generate_sequences(memes_text)
 
         # The embedding dimension
@@ -35,48 +41,59 @@ class MemeGenerator:
 
         self.model.compile(optimizer='adam', loss=loss)
 
-        EPOCHS = 1
-
-        self.model.fit(dataset, epochs=EPOCHS)
+        self.model.fit(dataset, epochs=self._epoch)
 
         self.model.save('model/')
 
-    def generate_text(self):
+    def _generate_text(self,min_text_lenght, max_text_lenght):
         one_step_model = OneStep(self.model, self.sequence_generator.chars_from_ids,
                                  self.sequence_generator.ids_from_chars)
 
         states = None
         next_char = tf.constant([' '])
+        initial_next_char = next_char
         result = [next_char]
 
-        for n in range(100):
-            next_char, states = one_step_model.generate_one_step(next_char, states=states)
-            result.append(next_char)
+        next_line_counter=0
+        while len(result)<min_text_lenght:
+            result = [initial_next_char]
+            next_line_counter=0
+            for n in range(max_text_lenght):
+                next_char, states = one_step_model.generate_one_step(next_char, states=states)
+                if tf.strings.join(next_char) == "\n":
+                    next_line_counter += 1
+
+                if next_line_counter > 1:
+                    break
+                else:
+                    result.append(next_char)
+
+
+
 
         result = tf.strings.join(result)
 
-        print(result[0].numpy().decode('utf-8'), '\n\n' + '_' * 80)
+        meme_text=result[0].numpy().decode('utf-8')
+        return meme_text
 
-    def generate_meme(self):
+    def generate_meme(self,min_text_lenght,max_text_lenght):
+        meme_text=self._generate_text(min_text_lenght=min_text_lenght,max_text_lenght=max_text_lenght)
+        meme_text_separator_index = meme_text.find("\n")
+        meme_text_line1=meme_text[0:meme_text_separator_index]
+        meme_text_line2=meme_text[meme_text_separator_index+1:len(meme_text)]
 
-        # Fetch the available memes
-        data = requests.get('https://api.imgflip.com/get_memes').json()['data']['memes']
-        images = [{'name': image['name'], 'url': image['url'], 'id': image['id']} for image in data]
+        meme_id_list = self._getMemeIDList()
 
-        # List all the memes
-        print('Here is the list of available memes : \n')
-        ctr = 1
-        for img in images:
-            print(ctr, img['id'], img['name'])
-            ctr = ctr + 1
+        random_meme_id = meme_id_list[random.randint(0,len(meme_id_list))]
+
 
         URL = 'https://api.imgflip.com/caption_image'
         params = {
             'username': self.__username,
             'password': self.__password,
-            'template_id': 181913649,
-            'text0': 'text0',
-            'text1': 'text1'
+            'template_id': random_meme_id,
+            'text0': meme_text_line1,
+            'text1': meme_text_line2
         }
         response = requests.request('POST', URL, params=params).json()
         print(response)
@@ -84,5 +101,17 @@ class MemeGenerator:
         # Save the meme
         opener = urllib.request.URLopener()
         opener.addheader('User-Agent', self.__user_agent)
-        filename, headers = opener.retrieve(response['data']['url'], '2.jpg')
+        filename, headers = opener.retrieve(response['data']['url'], 'ml_generated_meme_'+datetime.now().strftime("%d-%b-%Y-%H-%M-%S-%f")+".jpg")
+
+    def _getMemeIDList(self):
+        # Fetch the available memes
+        data = requests.get('https://api.imgflip.com/get_memes').json()['data']['memes']
+        images = [{'name': image['name'], 'url': image['url'], 'id': image['id']} for image in data]
+
+        ids=[]
+        for img in images:
+            ids.append(img["id"])
+
+
+        return ids
 

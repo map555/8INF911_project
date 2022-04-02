@@ -18,10 +18,8 @@ if __name__ == '__main__':
         WriteMemesText(df)
         memes_text = LoadMemesText()
 
-    meme_generator = MemeGenerator()
+    meme_generator = MemeGenerator(epoch_number=1,memes_text=memes_text)
 
-   #meme_generator.train_model(memes_text)
+    for i in range(25):
 
-    #meme_generator.generate_text()
-
-    meme_generator.generate_meme()
+        meme_generator.generate_meme(50,100)

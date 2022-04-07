@@ -3,6 +3,9 @@ from os import getcwd
 import tensorflow as tf
 from tensorflow import keras as kr
 
+import RNN
+
+
 def IsMemesTextExist():
     dataset_file_existance = exists("meme_text.txt")
 
@@ -24,8 +27,10 @@ def LoadMemesText():
 
     return memes_text
 
-def IsModelExist():
-    return isdir(join(getcwd(),"model"))
+def IsModelExist(model_name):
+    return isdir(join(getcwd(),model_name))
 
 def LoadModel():
-    return kr.models.load_model("model")
+    return kr.models.load_model("model", custom_objects={"RNNModel":RNN.RNNModel})
+
+

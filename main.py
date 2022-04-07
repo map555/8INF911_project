@@ -20,6 +20,6 @@ if __name__ == '__main__':
 
     meme_generator = MemeGenerator(epoch_number=1,memes_text=memes_text)
 
-    for i in range(25):
+    for i in range(5):
 
         meme_generator.generate_meme(50,100)

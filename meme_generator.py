@@ -20,26 +20,20 @@ class MemeGenerator:
         self.__password = os.environ.get('meme_password')
         self.__user_agent = os.environ.get("meme_user_agent")
         self._epoch = epoch_number
-        if IsModelExist():
-            self.model=LoadModel()
-            self.sequence_generator.generate_sequences(memes_text)
+        self._embeddingDim=512
+        self._rnnUnits=1024
+
+        self.sequence_generator.generate_sequences(memes_text)
+        self.model = RNNModel(vocab_size=len(self.sequence_generator.ids_from_chars.get_vocabulary()),
+                              embedding_dim=self._embeddingDim, rnn_units=self._rnnUnits)
+
+        if IsModelExist(model_name="model"):
+            self.model.load_weights("model/model")
         else:
             self._train_model(memes_text)
 
     def _train_model(self, memes_text):
         dataset = self.sequence_generator.generate_sequences(memes_text)
-
-        # The embedding dimension
-        embedding_dim = 256
-
-        # Number of RNN units
-        rnn_units = 1024
-
-        self.model = RNNModel(
-            # Be sure the vocabulary size matches the `StringLookup` layers.
-            vocab_size=len(self.sequence_generator.ids_from_chars.get_vocabulary()),
-            embedding_dim=embedding_dim,
-            rnn_units=rnn_units)
 
         loss = tf.losses.SparseCategoricalCrossentropy(from_logits=True)
 
@@ -47,7 +41,7 @@ class MemeGenerator:
 
         self.model.fit(dataset, epochs=self._epoch)
 
-        self.model.save('model/')
+        self.model.save_weights("model/model")
 
     def _generate_text(self, min_text_lenght, max_text_lenght):
         x=self.sequence_generator.ids_from_chars

@@ -1,6 +1,7 @@
-from os.path import exists
+from os.path import exists, isdir, join
+from os import getcwd
 import tensorflow as tf
-
+from tensorflow import keras as kr
 
 def IsMemesTextExist():
     dataset_file_existance = exists("meme_text.txt")
@@ -22,3 +23,9 @@ def LoadMemesText():
         text_file.close()
 
     return memes_text
+
+def IsModelExist():
+    return isdir(join(getcwd(),"model"))
+
+def LoadModel():
+    return kr.models.load_model("model")

@@ -8,13 +8,6 @@ pd.set_option('display.width', 1500)
 
 if __name__ == '__main__':
 
-    dict_test={"patate":69}
-    print(dict_test["patate"])
-
-    dict_test["clé"]="valeur"
-    print(dict_test["clé"])
-
-
     gpus = tf.config.experimental.list_physical_devices('GPU')
     if gpus:
         try:

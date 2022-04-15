@@ -28,9 +28,8 @@ if __name__ == '__main__':
         memes_text = LoadMemesText()
 
     # meme_generator = SimpleRNN(epoch_number=1, memes_text=memes_text)
-    meme_generator2 = SimpleRNNWordByWord(epoch_number=1,memes_text=memes_text)
+    meme_generator2 = SimpleRNNWordByWord(epoch_number=30, memes_text=memes_text)
+    # meme_generator = RNNWordByWordWithImage(epoch_number=1)
 
     for i in range(5):
-
-        meme_generator2.generate_meme(50,100)
-
+        meme_generator2.generate_meme()

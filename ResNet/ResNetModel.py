@@ -17,16 +17,15 @@ class ResNetModel:
         self.load_resnet_model()
 
     def load_resnet_model(self):
-        self.dataset = tf.keras.utils.image_dataset_from_directory(
-            'ImgFlip575k_Dataset-master/dataset/img',
-            labels='inferred',
-            label_mode='categorical',
-        )
 
         if IsModelExist(model_name='resnet_model'):
             self.resnet_model = load_model('resnet_model')
         else:
-
+            self.dataset = tf.keras.utils.image_dataset_from_directory(
+                'ImgFlip575k_Dataset-master/dataset/img',
+                labels='inferred',
+                label_mode='categorical',
+            )
             self.resnet_model = Sequential()
 
             pretrained_model = tf.keras.applications.ResNet50(include_top=False,

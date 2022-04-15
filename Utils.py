@@ -2,6 +2,7 @@ from os.path import exists, isdir, join
 from os import getcwd
 import tensorflow as tf
 from tensorflow import keras as kr
+import pandas as pd
 
 import RNN
 
@@ -27,10 +28,30 @@ def LoadMemesText():
 
     return memes_text
 
+
+def IsMemesTextByTemplateCSVExist():
+    return exists('memes_text_by_template.csv')
+
+
+def WriteMemesTextByTemplateToCSV(df):
+    group = df.groupby('template')
+
+    df = group.apply(lambda x: x['content'].str.cat(sep='\n\n'))
+
+    df.to_csv('memes_text_by_template.csv')
+
+
+def LoadMemesTextByTemplateFromCSV():
+    df = pd.read_csv('memes_text_by_template.csv')
+
+    df = df.rename(columns={"0": "text"})
+
+    return df
+
+
 def IsModelExist(model_name):
-    return isdir(join(getcwd(),model_name))
+    return isdir(join(getcwd(), model_name))
+
 
 def LoadModel():
-    return kr.models.load_model("model", custom_objects={"RNNModel":RNN.RNNModel})
-
-
+    return kr.models.load_model("model", custom_objects={"RNNModel": RNN.RNNModel})

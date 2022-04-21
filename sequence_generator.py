@@ -66,7 +66,7 @@ class WordSequenceGenerator:
         # Take a look at the first 250 characters in text
 
         # The unique characters in the file
-        t = self._text.lower()
+        t = self._text.upper()
 
         t = t.replace("!", "")
         t = t.replace("\"", "")
@@ -82,8 +82,6 @@ class WordSequenceGenerator:
         t = t.replace("\n\n", ". ") # maybe remove all dots?
         t = t.replace("\n", ". ")
         t = t.replace(" .", ".")
-
-        # TODO uppercase
 
         self._text = t
 

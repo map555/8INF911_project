@@ -27,9 +27,15 @@ if __name__ == '__main__':
         WriteMemesText(df)
         memes_text = LoadMemesText()
 
+    template_id_df = pd.read_excel("templates.xlsx",dtype={"template":str,"id":int})
+
     # meme_generator = SimpleRNN(epoch_number=1, memes_text=memes_text)
-    meme_generator2 = SimpleRNNWordByWord(epoch_number=30, memes_text=memes_text)
+    #meme_generator2 = SimpleRNNWordByWord(epoch_number=30, memes_text=memes_text)
     # meme_generator = RNNWordByWordWithImage(epoch_number=1)
+    meme_generator3 = RnnWordByWordWithImage2(epoch_number=2)
 
     for i in range(5):
-        meme_generator2.generate_meme()
+        meme_generator3.GenerateMeme()
+
+    #for i in range(5):
+        #meme_generator2.generate_meme()

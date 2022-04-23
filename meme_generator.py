@@ -26,7 +26,7 @@ from PIL import Image
 
 # Load the numpy files
 def map_func(img_name, cap):
-    img_tensor = np.load('image_text_example/memes/img/' + img_name.decode('utf-8') + '.jpg.npy')
+    img_tensor = np.load('memes/img/' + img_name.decode('utf-8') + '.jpg.npy')
     return img_tensor, cap
 
 
@@ -385,7 +385,7 @@ class RnnWordByWordWithImage2:
         self._decoder = RNN_Decoder(self._embeddingDim, self._units, self._tokenizer.vocabulary_size())
         self._optimizer = tf.keras.optimizers.Adam()
         self._lossObject = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True, reduction='none')
-        self._checkPointPath = "./checpoints/train"
+        self._checkPointPath = "./checkpoints/train"
         self._checkPoint = tf.train.Checkpoint(encoder=self._encoder,decoder=self._decoder,optimizer=self._optimizer)
         self._checkPointManager = tf.train.CheckpointManager(self._checkPoint, self._checkPointPath, max_to_keep=5)
 
@@ -560,7 +560,7 @@ class RnnWordByWordWithImage2:
         template_data = template_id_df.iloc[[template_row_id]]
         template_id = template_data["id"].values[0]
         template_name = template_data["template"].values[0]
-        templates_img_path = "image_text_example/memes_original/img/{img_name}.jpg".format(img_name=template_name)
+        templates_img_path = "memes/img/{img_name}.jpg".format(img_name=template_name)
 
         result, attention_plot = self._Evaluate(templates_img_path)
 

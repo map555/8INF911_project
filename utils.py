@@ -1,6 +1,5 @@
 from os.path import exists, isdir, join
 from os import getcwd
-import tensorflow as tf
 from tensorflow import keras as kr
 import pandas as pd
 

@@ -1,27 +1,22 @@
 import collections
 import json
+import os
+import pickle as pkl
 import random
 import time
-
-import numpy
-
-from DatasetBuilder import isDatasetExist, importDataset, getDataset
-from ResNet.ResNetModel import ResNetModel
-from sequence_generator import *
-from RNN import *
-from one_step import *
-import os
-import requests
 import urllib
 from datetime import datetime
-from Utils import *
-import pickle as pkl
+
+import numpy
+import numpy as np
+import requests
+
 from CNN_encoder import CNN_Encoder
+from RNN import *
 from RNN_decoder import RNN_Decoder
-from PIL import Image
-
-
-
+from one_step import *
+from sequence_generator import *
+from utils import *
 
 
 # Load the numpy files
@@ -238,115 +233,6 @@ class SimpleRNNWordByWord:
         return df
 
 
-class RNNWordByWordWithImage:
-    sequence_generator = []
-    model = []
-
-    def __init__(self, epoch_number):
-        self.resnet_model = ResNetModel()
-        self.memes_df = self._load_memes_df()
-        self.sequence_generator = WordImageSequenceGenerator(self.memes_df)
-        self.__username = os.environ.get('meme_username')
-        self.__password = os.environ.get('meme_password')
-        self.__user_agent = os.environ.get("meme_user_agent")
-        self._epoch = epoch_number
-        self._embeddingDim = 8
-        self._rnnUnits = 16
-
-        self.sequence_generator.generate_sequences()  # TODO
-        self.model = RNNModel(vocab_size=len(self.sequence_generator.ids_from_words.get_vocabulary()),
-                              embedding_dim=self._embeddingDim, rnn_units=self._rnnUnits)
-
-        if IsModelExist(model_name="word_by_word_with_image_model"):
-            self.model.load_weights("word_by_word_with_image_model/word_by_word_with_image_model")
-        else:
-            self._train_model()
-
-    def _load_memes_df(self):
-        if not IsMemesTextByTemplateCSVExist():
-            self._create_csv_file()
-        memes_text_df = LoadMemesTextByTemplateFromCSV()
-        memes_text_df['resnet_prediction'] = memes_text_df.apply(
-            lambda x: self.resnet_model.predict(
-                'ImgFlip575K_Dataset-master/dataset/img/' + x['template'] + '/' + x['template'] + '.jpg'), axis=1)
-        return memes_text_df
-
-    def _create_csv_file(self):
-        if isDatasetExist():
-            df = importDataset()
-        else:
-            df = getDataset("ImgFlip575K_Dataset-master\\dataset\\memes")
-        WriteMemesTextByTemplateToCSV(df)
-
-    def _train_model(self):
-        dataset = self.sequence_generator.generateSequences()
-
-        loss = tf.losses.SparseCategoricalCrossentropy(from_logits=True)
-
-        self.model.compile(optimizer='adam', loss=loss)
-
-        self.model.fit(dataset, epochs=self._epoch)
-
-        self.model.save_weights("word_by_word_model/word_by_word_model")
-
-    def _generate_text(self, min_text_lenght, max_text_lenght):
-        x = self.sequence_generator.ids_from_words
-        one_step_model = OneStepWorldByWorld(self.model, self.sequence_generator.words_from_ids,
-                                             self.sequence_generator.ids_from_words)
-
-        states = None
-        next_words = tf.constant([' '])
-        initial_next_char = next_words
-        meme_strings = []
-
-        for i in range(2):
-            next_words = initial_next_char
-            string_result = ""
-            while (len(string_result) < max_text_lenght):
-                next_words, states = one_step_model.generate_one_step(next_words, states=states)
-                string_result += tf.strings.join(next_words).numpy().decode("utf-8") + " "
-            meme_strings.append(string_result)
-
-        return meme_strings
-
-    def generate_meme(self, min_text_lenght, max_text_lenght):
-        meme_text = self._generate_text(min_text_lenght=min_text_lenght, max_text_lenght=max_text_lenght)
-
-        meme_id_list = self._getMemeIDList()
-
-        random_meme_id = meme_id_list[random.randint(0, len(meme_id_list) - 1)]
-
-        URL = 'https://api.imgflip.com/caption_image'
-
-        params = {
-            'username': self.__username,
-            'password': self.__password,
-            'template_id': random_meme_id,
-            'boxes[0][text]': meme_text[0],
-            'boxes[1][text]': meme_text[1]
-        }
-
-        response = requests.request('POST', URL, params=params).json()
-        print(response)
-
-        # Save the meme
-        opener = urllib.request.URLopener()
-        opener.addheader('User-Agent', self.__user_agent)
-        filename, headers = opener.retrieve(response['data']['url'], 'ml_generated_meme_' + datetime.now().strftime(
-            "%d-%b-%Y-%H-%M-%S-%f") + ".jpg")
-
-    def _getMemeIDList(self):
-        # Fetch the available memes
-        data = requests.get('https://api.imgflip.com/get_memes').json()['data']['memes']
-        images = [{'name': image['name'], 'url': image['url'], 'id': image['id']} for image in data]
-
-        ids = []
-        for img in images:
-            ids.append(img["id"])
-
-        return ids
-
-
 class RnnWordByWordWithImage2:
     def __init__(self, epoch_number):
         self._batchSize = 64
@@ -358,8 +244,8 @@ class RnnWordByWordWithImage2:
         self._maxLenght = 50  # Max word count for a caption.
         self._vocabSize = 5000  # Use the top 5000 words for a vocabulary
         self._skip = True
-        self._epochNumber =epoch_number
-        self._startEpoch=0
+        self._epochNumber = epoch_number
+        self._startEpoch = 0
 
         self._InitializeTemplateDF()
         self._InitializeTrainCaption()
@@ -386,7 +272,7 @@ class RnnWordByWordWithImage2:
         self._optimizer = tf.keras.optimizers.Adam()
         self._lossObject = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True, reduction='none')
         self._checkPointPath = "./checkpoints/train"
-        self._checkPoint = tf.train.Checkpoint(encoder=self._encoder,decoder=self._decoder,optimizer=self._optimizer)
+        self._checkPoint = tf.train.Checkpoint(encoder=self._encoder, decoder=self._decoder, optimizer=self._optimizer)
         self._checkPointManager = tf.train.CheckpointManager(self._checkPoint, self._checkPointPath, max_to_keep=5)
 
         if self._checkPointManager.latest_checkpoint:
@@ -536,15 +422,15 @@ class RnnWordByWordWithImage2:
         # many times, the loss_plot array will be reset
         loss_plot = []
 
-        for ep in range(self._startEpoch,self._epochNumber):
+        for ep in range(self._startEpoch, self._epochNumber):
             start = time.time()
-            total_loss =0
+            total_loss = 0
 
-            for (batch, (img_tensor,target)) in enumerate(self._predictionDS):
-                batch_loss, t_loss = self._trainStep(img_tensor,target)
-                total_loss+=t_loss
+            for (batch, (img_tensor, target)) in enumerate(self._predictionDS):
+                batch_loss, t_loss = self._trainStep(img_tensor, target)
+                total_loss += t_loss
 
-                if batch %100 == 0:
+                if batch % 100 == 0:
                     average_batch_loss = batch_loss.numpy() / int(target.shape[1])
                     print(f'Epoch {ep + 1} Batch {batch} Loss {average_batch_loss:.4f}')
             # storing the epoch end loss value to plot later
@@ -564,8 +450,7 @@ class RnnWordByWordWithImage2:
 
         result, attention_plot = self._Evaluate(templates_img_path)
 
-        self._SendMemeToImgFlip(template_id,result)
-
+        self._SendMemeToImgFlip(template_id, result)
 
     @tf.function
     def _trainStep(self, img_tensor, target):
@@ -608,8 +493,8 @@ class RnnWordByWordWithImage2:
 
         return tf.reduce_mean(loss_)
 
-    def _RandomTemplateID(self,size):
-        return random.randint(0,size-1)
+    def _RandomTemplateID(self, size):
+        return random.randint(0, size - 1)
 
     def _SendMemeToImgFlip(self, template_id, meme_texts):
 

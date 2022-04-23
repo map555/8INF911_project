@@ -1,3 +1,4 @@
+# code from https://www.tensorflow.org/tutorials/text/image_captioning
 import tensorflow as tf
 
 from bahdanau_attention import BahdanauAttention

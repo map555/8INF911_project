@@ -1,6 +1,4 @@
-import keras
 import tensorflow as tf
-import numpy as np
 
 
 class OneStep(tf.keras.Model):
@@ -47,6 +45,7 @@ class OneStep(tf.keras.Model):
         # Return the characters and model state.
         return predicted_chars, states
 
+
 class OneStepWorldByWorld(tf.keras.Model):
     def __init__(self, model, words_from_ids, ids_from_words, temperature=1.0):
         super().__init__()
@@ -67,7 +66,7 @@ class OneStepWorldByWorld(tf.keras.Model):
     @tf.function
     def generate_one_step(self, inputs, states=None):
         # Convert strings to token IDs.
-        input_words=tf.strings.split(inputs,sep=" ")
+        input_words = tf.strings.split(inputs, sep=" ")
         input_ids = self.ids_from_words(input_words).to_tensor()
 
         # Run the model.

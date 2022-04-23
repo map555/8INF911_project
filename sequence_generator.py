@@ -79,7 +79,7 @@ class WordSequenceGenerator:
         t = t.replace("\\", "")
         t = re.sub(r'[^a-zA-Z\n]', ' ', t)
         t = re.sub(r' +', ' ', t)
-        t = t.replace("\n\n", ". ") # maybe remove all dots?
+        t = t.replace("\n\n", ". ")  # maybe remove all dots?
         t = t.replace("\n", ". ")
         t = t.replace(" .", ".")
 
